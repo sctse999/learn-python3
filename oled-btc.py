@@ -1,0 +1,70 @@
+import datetime
+import pytz
+import time
+import requests
+
+def get_text():
+    response = requests.get('https://api.coindesk.com/v1/bpi/currentprice.json')
+    data = response.json()
+
+    text = "Bitcoin Price: \n"
+    
+    text += "BTCUSD: {}\n".format(data['bpi']['USD']['rate'])
+    text += "BTCEUR: {}".format(data['bpi']['EUR']['rate'])
+
+    return text
+
+# displayText.py
+#
+# Description:
+# Prints text to an SSD1306 display module using the Adafruit_Python_SSD1306
+# and Python Imaging Library (PIL) libraries.
+#
+# Created by John Woolsey on 07/05/2018.
+# Copyright (c) 2018 Woolsey Workshop.  All rights reserved.
+
+
+import Adafruit_SSD1306
+from PIL import Image, ImageDraw, ImageFont
+import RPi.GPIO as GPIO
+
+
+# Adafruit_Python_SSD1306 graphics library configuration for
+# SunFounder OLED SSD1306 Display Module.
+# Use the configuration compatible with your display module.
+# See library "examples" directory for configuration selection.
+# 128x64 display with hardware I2C and no reset pin
+display = Adafruit_SSD1306.SSD1306_128_64(rst=None)
+
+# Setup
+display.begin()  # initialize graphics library for selected display module
+display.clear()  # clear display buffer
+display.display()  # write display buffer to physical display
+displayWidth = display.width  # get width of display
+displayHeight = display.height  # get height of display
+
+
+font = ImageFont.load_default()  # load and set default font
+
+
+try:
+    while True:
+        display.clear()  # clear display buffer
+        
+        image = Image.new('1', (displayWidth, displayHeight))  # create graphics library image buffer
+        draw = ImageDraw.Draw(image)  # create drawing object
+        
+        # Draw text
+        draw.text((0,0), get_text(), font=font, fill=255)  # print text to image buffer255
+
+        # Display to screen
+        display.image(image)  # set display buffer with image buffer
+        display.display()  # write display buffer to physical display
+        
+        time.sleep(5)
+
+except KeyboardInterrupt:
+    print('interrupted!')
+
+# Cleanup
+# GPIO.cleanup()  # release all GPIO resources
