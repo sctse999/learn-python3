@@ -1,41 +1,20 @@
-# displayText.py
-#
-# Description:
-# Prints text to an SSD1306 display module using the Adafruit_Python_SSD1306
-# and Python Imaging Library (PIL) libraries.
-#
-# Created by John Woolsey on 07/05/2018.
-# Copyright (c) 2018 Woolsey Workshop.  All rights reserved.
+from luma.core.interface.serial import i2c, spi, pcf8574
+from luma.core.interface.parallel import bitbang_6800
+from luma.core.render import canvas
+from luma.oled.device import ssd1306, ssd1309, ssd1325, ssd1331, sh1106, ws0010
 
+import time
 
-import Adafruit_SSD1306
-from PIL import Image, ImageDraw, ImageFont
-import RPi.GPIO as GPIO
+# rev.1 users set port=0
+# substitute spi(device=0, port=0) below if using that interface
+# substitute bitbang_6800(RS=7, E=8, PINS=[25,24,23,27]) below if using that interface
+serial = i2c(port=1, address=0x3C)
 
+# substitute ssd1331(...) or sh1106(...) below if using that device
+device = sh1106(serial)
 
-# Adafruit_Python_SSD1306 graphics library configuration for
-# SunFounder OLED SSD1306 Display Module.
-# Use the configuration compatible with your display module.
-# See library "examples" directory for configuration selection.
-# 128x64 display with hardware I2C and no reset pin
-display = Adafruit_SSD1306.SSD1306_128_64(rst=None)
-
-# Setup
-display.begin()  # initialize graphics library for selected display module
-display.clear()  # clear display buffer
-display.display()  # write display buffer to physical display
-displayWidth = display.width  # get width of display
-displayHeight = display.height  # get height of display
-image = Image.new('1', (displayWidth, displayHeight))  # create graphics library image buffer
-draw = ImageDraw.Draw(image)  # create drawing object
-font = ImageFont.load_default()  # load and set default font
-
-# Draw text
-draw.text((0,0), "Hello,\nRaspberry Pi!", font=font, fill=255)  # print text to image buffer255
-
-# Display to screen
-display.image(image)  # set display buffer with image buffer
-display.display()  # write display buffer to physical display
-
-# Cleanup
-# GPIO.cleanup()  # release all GPIO resources
+while True:
+    with canvas(device) as draw:
+        draw.rectangle(device.bounding_box, outline="white", fill="black")
+        draw.text((0, 0), "Hello World", fill="white")
+        time.sleep(1)
