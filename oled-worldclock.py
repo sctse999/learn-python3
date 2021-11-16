@@ -34,6 +34,7 @@ serial = i2c(port=1, address=0x3C)
 
 # substitute ssd1331(...) or sh1106(...) below if using that device
 device = sh1106(serial)
+device.cleanup = None
 
 font1 = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf',8)
 
